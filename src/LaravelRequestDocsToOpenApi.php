@@ -291,7 +291,7 @@ class LaravelRequestDocsToOpenApi
 
             $value = json_encode($value);
 
-            $key = Str::camel($header);
+            $key = \Illuminate\Support\Str::camel($header);
 
             $this->openApi['components']['securitySchemes'][$key] = [
                 'type' => 'apiKey',

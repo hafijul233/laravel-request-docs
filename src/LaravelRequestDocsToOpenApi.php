@@ -2,6 +2,8 @@
 
 namespace Rakutentech\LaravelRequestDocs;
 
+use Illuminate\Support\Str;
+
 class LaravelRequestDocsToOpenApi
 {
     private array $openApi = [];
@@ -24,6 +26,7 @@ class LaravelRequestDocsToOpenApi
 
         $this->docsToOpenApi($docs);
         $this->appendGlobalSecurityScheme();
+        $this->appendDefaultHeaders();
         return $this;
     }
 
@@ -251,6 +254,33 @@ class LaravelRequestDocsToOpenApi
 
             default:
                 break;
+        }
+    }
+    protected function appendDefaultHeaders(): void
+    {
+        $appendDefaultHeaders = config('request-docs.open_api.append_default_headers', false);
+
+        if (!$appendDefaultHeaders) {
+            return;
+        }
+
+        $defaultHeaders = config('request-docs.open_api.default_headers', []);
+
+        foreach ($defaultHeaders as $header => $value) {
+
+            $value = json_encode($value);
+
+            $key = Str::camel($header);
+
+            $this->openApi['components']['securitySchemes'][$key] = [
+                'type' => 'apiKey',
+                'name' => $header,
+                'in' => 'header',
+                'description' => "Header : {$header}\n Default Value : {$value}",
+                'scheme' => 'header',
+                'default' => $value,
+            ];
+            $this->openApi['security'][] = [$key => []];
         }
     }
 
